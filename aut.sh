@@ -1,9 +1,14 @@
 #!/bin/bash
 
 # Configuration variables
-REPO_OWNER="your-org"            # Your GitHub organization/username
-REPO_NAME="your-repo"            # The name of your repository
-SOURCE_BRANCH="your-source-branch" # The branch containing the changes
+# Configuration variables
+REPO_OWNER="ANSANJAY"                 # Your GitHub organization/username
+REPO_NAME="test"                      # The name of your repository
+SOURCE_BRANCH="test_branch"           # The branch containing the changes
+TARGET_BRANCH="main"                  # The branch you are merging into
+PR_TITLE="Automated SonarQube Integration"
+PR_BODY="This PR includes updates from SonarQube analysis integration."
+
 TARGET_BRANCH="main"             # The branch you are merging into
 PR_TITLE="Automated SonarQube Integration"
 PR_BODY="This PR includes updates from SonarQube analysis integration."
