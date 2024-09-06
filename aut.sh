@@ -66,7 +66,6 @@ create_pull_request() {
     fi
 }
 
-# Inform the end user about changes made with dynamic file listing
 inform_end_user() {
     echo "Gathering list of changed files and detailed line changes for notification..."
 
@@ -82,23 +81,38 @@ inform_end_user() {
     CHANGE_NOTIFICATION="### Automated PR Changes Summary<br><br>"
     CHANGE_NOTIFICATION+="This PR includes changes to the following files:<br><br>"
 
-    # Iterate through each changed file and extract the changes
+    # Iterate through each changed file and extract the changes specific to each file
     while IFS= read -r file; do
         echo "Processing file: $file"  # Debug statement
 
         # Extract the specific diff section for this file
-        file_diff=$(echo "$pr_diff" | awk "/^diff --git a\/$file/,/^diff --git/ {print}" | grep -v "^diff --git" | grep -v "^index" | grep -v "^---" | grep -v "^\+\+\+")
+        file_diff=$(echo "$pr_diff" | awk "/^diff --git a\/$file/,/^diff --git/" | grep -v "^diff --git" | grep -v "^index" | grep -v "^---" | grep -v "^\+\+\+")
         echo "File-specific diff for $file:"  # Debug statement
         echo "$file_diff"
 
-        # Extract added lines for this specific file using extended regex to handle the + symbol
-        added_lines=$(echo "$file_diff" | grep -E "^\\+[^+]" | sed 's/^+//')
-        # Extract removed lines for this specific file using extended regex to handle the - symbol
+        # Ensure file_diff is not empty before processing further
+        if [[ -z "$file_diff" ]]; then
+            echo "No diff found for $file."
+            continue
+        fi
+
+        # Extract added lines for this specific file using correct grep pattern
+        added_lines=$(echo "$file_diff" | grep -E "^\+[^+]" | sed 's/^+//')
+        # Extract removed lines for this specific file using correct grep pattern
         removed_lines=$(echo "$file_diff" | grep -E "^-[^-]" | sed 's/^-//')
 
         # Debug prints to verify extracted lines
-        echo "Added lines for $file: $added_lines"  # Debug statement
-        echo "Removed lines for $file: $removed_lines"  # Debug statement
+        if [[ -n "$added_lines" ]]; then
+            echo "Added lines for $file: $added_lines"  # Debug statement
+        else
+            echo "No added lines found for $file."  # Debug statement
+        fi
+        
+        if [[ -n "$removed_lines" ]]; then
+            echo "Removed lines for $file: $removed_lines"  # Debug statement
+        else
+            echo "No removed lines found for $file."  # Debug statement
+        fi
 
         # Append the file header to the notification
         CHANGE_NOTIFICATION+="**File**: \`$file\`<br>"
